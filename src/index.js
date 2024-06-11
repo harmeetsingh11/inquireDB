@@ -42,7 +42,10 @@ const getDatabaseSchema = () => {
         }
 
         tables.forEach((table) => {
-          db.all(`PRAGMA table_info(${table.name});`, (err, columns) => {
+          const tableName = table.name.includes(' ')
+            ? `[${table.name}]`
+            : table.name;
+          db.all(`PRAGMA table_info(${tableName});`, (err, columns) => {
             if (err) {
               reject(err);
               return;
@@ -61,7 +64,7 @@ const getDatabaseSchema = () => {
   });
 };
 
-// Function to get a SQL query from LLM using Groq
+/// Function to get a SQL query from LLM using Groq
 const getSQLQueryFromLLM = async (question, schema) => {
   try {
     const schemaDescription = Object.entries(schema)
@@ -75,15 +78,18 @@ const getSQLQueryFromLLM = async (question, schema) => {
       messages: [
         {
           role: 'user',
-          content: `Here is the database schema:\n${schemaDescription}\nConvert the following natural language question to an SQL query: "${question}"`,
+          content: `Here is the database schema:\n${schemaDescription}\nOnly give the SQL query for the following natural language question: "${question}"`,
         },
       ],
       model: 'llama3-8b-8192',
     });
+
     const generatedQuery = response.choices[0]?.message?.content.trim();
     if (!generatedQuery) {
       throw new Error('The LLM did not return a valid SQL query.');
     }
+
+    // console.log('Generated SQL Query:', generatedQuery); // Log the generated SQL query for debugging
     return generatedQuery;
   } catch (error) {
     console.error('Error fetching SQL query from LLM:', error);
@@ -104,13 +110,11 @@ const runSQLQuery = (query) => {
   });
 };
 
-// Function to handle user input and provide answers
+/// Function to handle user input and provide answers
 const handleUserInput = async (input) => {
   try {
     const schema = await getDatabaseSchema();
     const sqlQuery = await getSQLQueryFromLLM(input, schema);
-    console.log('Generated SQL Query:', sqlQuery); // Log the generated SQL query for debugging
-
     const results = await runSQLQuery(sqlQuery);
     if (results.length === 0) {
       console.log('No data found');
