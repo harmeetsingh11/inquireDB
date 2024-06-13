@@ -1,6 +1,7 @@
 require('dotenv').config(); // Load environment variables from .env
 const sqlite3 = require('sqlite3').verbose();
 const Groq = require('groq-sdk');
+const readline = require('readline');
 
 // Initialize Groq with API Key
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
@@ -92,19 +93,27 @@ const runSQLQuery = (query) => {
 
 // Main function to execute the process
 const main = async () => {
-  try {
-    const schema = await getSchemaInfo();
-    console.log('Schema extracted from database:', schema);
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
 
-    const question = 'List the names of all customers who are from USA.';
-    const sqlQuery = await generateSQLQuery(question, schema);
-    console.log('Generated SQL Query:', sqlQuery);
+  rl.question('Please enter your question: ', async (question) => {
+    try {
+      const schema = await getSchemaInfo();
+      // console.log('Schema extracted from database:', schema);
 
-    const results = await runSQLQuery(sqlQuery);
-    console.log('Query Results:', results);
-  } catch (err) {
-    console.error('Error:', err);
-  }
+      const sqlQuery = await generateSQLQuery(question, schema);
+      console.log('Generated SQL Query:', sqlQuery);
+
+      const results = await runSQLQuery(sqlQuery);
+      console.log('Query Results:', results);
+    } catch (err) {
+      console.error('Error:', err);
+    } finally {
+      rl.close();
+    }
+  });
 };
 
 main();
