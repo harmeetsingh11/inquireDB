@@ -1,144 +1,110 @@
+require('dotenv').config(); // Load environment variables from .env
 const sqlite3 = require('sqlite3').verbose();
-const readline = require('readline');
-const { config } = require('dotenv');
-const Groq = require('groq-sdk').default;
-const path = require('path');
+const Groq = require('groq-sdk');
 
-// Load environment variables from .env file
-config();
-
-// Initialize Groq SDK
+// Initialize Groq with API Key
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-// Define the path to the database file
-const dbPath = path.join(__dirname, '../Databases/northwind.db');
-
-// Initialize SQLite database
-const db = new sqlite3.Database(dbPath, (err) => {
-  if (err) {
-    console.error('Error opening database:', err.message);
-  } else {
-    console.log('Connected to the SQLite database.');
-  }
-});
-
-// Function to fetch table and column names from the database
-const getDatabaseSchema = () => {
+// Function to extract schema information from the SQLite3 database
+const getSchemaInfo = () => {
   return new Promise((resolve, reject) => {
-    db.all(
-      `SELECT name FROM sqlite_master WHERE type='table';`,
-      (err, tables) => {
-        if (err) {
-          reject(err);
-          return;
-        }
+    const db = new sqlite3.Database('./databases/northwind.db');
+    db.serialize(() => {
+      db.all(
+        "SELECT name FROM sqlite_master WHERE type='table';",
+        (err, tables) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          const schema = {};
+          let pendingTables = tables.length;
 
-        const schema = {};
-        let pending = tables.length;
-
-        if (pending === 0) {
-          resolve(schema);
-          return;
-        }
-
-        tables.forEach((table) => {
-          const tableName = table.name.includes(' ')
-            ? `[${table.name}]`
-            : table.name;
-          db.all(`PRAGMA table_info(${tableName});`, (err, columns) => {
-            if (err) {
-              reject(err);
-              return;
-            }
-
-            schema[table.name] = columns.map((column) => column.name);
-            pending -= 1;
-
-            if (pending === 0) {
-              resolve(schema);
-            }
+          tables.forEach((table) => {
+            const tableName = `"${table.name}"`; // Ensure table names with spaces are handled
+            db.all(`PRAGMA table_info(${tableName});`, (err, columns) => {
+              if (err) {
+                reject(err);
+                return;
+              }
+              schema[table.name] = columns.map((column) => column.name);
+              pendingTables -= 1;
+              if (pendingTables === 0) {
+                resolve(schema);
+                db.close();
+              }
+            });
           });
-        });
-      }
-    );
+        }
+      );
+    });
   });
 };
 
-/// Function to get a SQL query from LLM using Groq
-const getSQLQueryFromLLM = async (question, schema) => {
-  try {
-    const schemaDescription = Object.entries(schema)
-      .map(
-        ([table, columns]) =>
-          `Table ${table} with columns: ${columns.join(', ')}`
-      )
-      .join('\n');
+// Function to generate SQL query from a plain English question using GroqAPI
+const generateSQLQuery = async (question, schema) => {
+  const prompt = `
+You are a helpful assistant that converts plain English questions into SQL queries.
+Make sure the SQL queries match the actual table and column names in the schema provided.
+Output only the SQL query without any additional text.
 
-    const response = await groq.chat.completions.create({
-      messages: [
-        {
-          role: 'user',
-          content: `Here is the database schema:\n${schemaDescription}\nOnly give the SQL query for the following natural language question: "${question}"`,
-        },
-      ],
-      model: 'llama3-8b-8192',
-    });
+Schema:
+${JSON.stringify(schema, null, 2)}
 
-    const generatedQuery = response.choices[0]?.message?.content.trim();
-    if (!generatedQuery) {
-      throw new Error('The LLM did not return a valid SQL query.');
-    }
+Question: "${question}"
+SQL Query:
+`;
 
-    // console.log('Generated SQL Query:', generatedQuery); // Log the generated SQL query for debugging
-    return generatedQuery;
-  } catch (error) {
-    console.error('Error fetching SQL query from LLM:', error);
-    throw new Error('Failed to get SQL query from LLM');
-  }
+  const chatCompletion = await groq.chat.completions.create({
+    messages: [
+      {
+        role: 'system',
+        content:
+          'you are a helpful assistant that converts plain English questions into SQL queries. Output only the SQL query without any additional text.',
+      },
+      { role: 'user', content: prompt },
+    ],
+    model: 'llama3-8b-8192',
+    temperature: 0.5,
+    max_tokens: 1024,
+    top_p: 1,
+    stop: null,
+    stream: false,
+  });
+
+  return chatCompletion.choices[0]?.message?.content.trim() || '';
 };
 
-// Function to run a SQL query and return the results
+// Function to run the generated SQL query on the SQLite3 database and display the results
 const runSQLQuery = (query) => {
   return new Promise((resolve, reject) => {
-    db.all(query, [], (err, rows) => {
+    const db = new sqlite3.Database('./databases/northwind.db');
+    db.all(query, (err, rows) => {
       if (err) {
-        reject(err.message);
-      } else {
-        resolve(rows);
+        reject(err);
+        return;
       }
+      resolve(rows);
+      db.close();
     });
   });
 };
 
-/// Function to handle user input and provide answers
-const handleUserInput = async (input) => {
+// Main function to execute the process
+const main = async () => {
   try {
-    const schema = await getDatabaseSchema();
-    const sqlQuery = await getSQLQueryFromLLM(input, schema);
+    const schema = await getSchemaInfo();
+    console.log('Schema extracted from database:', schema);
+
+    const question = 'List the names of all customers who are from USA.';
+    const sqlQuery = await generateSQLQuery(question, schema);
+    console.log('Generated SQL Query:', sqlQuery);
+
     const results = await runSQLQuery(sqlQuery);
-    if (results.length === 0) {
-      console.log('No data found');
-    } else {
-      console.log('Query Results:', results);
-    }
-  } catch (error) {
-    console.error('Error:', error.message);
+    console.log('Query Results:', results);
+  } catch (err) {
+    console.error('Error:', err);
   }
 };
 
-// Setup readline interface for command-line interaction
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-  prompt: 'Ask your question: ',
-});
-
-rl.prompt();
-
-rl.on('line', (line) => {
-  handleUserInput(line.trim());
-  rl.prompt();
-}).on('close', () => {
-  console.log('Exiting the application. Goodbye!');
-  db.close();
-});
+main();
