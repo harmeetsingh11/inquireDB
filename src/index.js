@@ -166,10 +166,12 @@ const main = async () => {
       console.log('Generated SQL Query:', sqlQuery);
 
       sqlQuery = validateAndCorrectQuery(sqlQuery, schema);
-      console.log('Validated and Corrected SQL Query:', sqlQuery);
+      // console.log('Validated and Corrected SQL Query:', sqlQuery);
 
       const results = await runSQLQuery(sqlQuery);
-      console.log('Query Results:', results);
+      // console.log('Query Results:', results);
+      console.log('Query Results:');
+      console.table(results);
     } catch (err) {
       console.error('Error:', err);
     } finally {
