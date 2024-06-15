@@ -160,18 +160,19 @@ const main = async () => {
   rl.question('Please enter your question: ', async (question) => {
     try {
       const schema = await getSchemaInfo();
-      // console.log('Schema extracted from database:', schema);
-
       let sqlQuery = await generateSQLQuery(question, schema);
       console.log('Generated SQL Query:', sqlQuery);
 
       sqlQuery = validateAndCorrectQuery(sqlQuery, schema);
-      // console.log('Validated and Corrected SQL Query:', sqlQuery);
+      console.log('Validated and Corrected SQL Query:', sqlQuery);
 
       const results = await runSQLQuery(sqlQuery);
-      // console.log('Query Results:', results);
       console.log('Query Results:');
-      console.table(results);
+      if (results.length === 0) {
+        console.log('No results found.');
+      } else {
+        console.table(results);
+      }
     } catch (err) {
       console.error('Error:', err);
     } finally {
