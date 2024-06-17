@@ -31,7 +31,7 @@ db = SQLDatabase.from_uri('sqlite:///Databases/northwind.db')
 chain = create_sql_query_chain(llm, db)
 
 # Invoke the chain with a question
-response = chain.invoke({"question": "How many employees are there?"})
+response = chain.invoke({"question": "List the product names, supplier names, and total quantities ordered for each product. Only include products that have been ordered more than 50 times, and sort the results by the total quantity ordered in descending order."})
 
 print(response)
 
