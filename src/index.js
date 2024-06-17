@@ -1,4 +1,4 @@
-/* require('dotenv').config(); // Load environment variables from .env
+require('dotenv').config(); // Load environment variables from .env
 const sqlite3 = require('sqlite3').verbose();
 const Groq = require('groq-sdk');
 const readline = require('readline');
@@ -182,71 +182,3 @@ const main = async () => {
 };
 
 main();
- */
-
-const { ChatGroq } = require('@langchain/groq'); // Assuming 'groq-sdk' is the correct package name
-const { SqlDatabase } = require('langchain/sql_db');
-const { createSqlAgent, SqlToolkit } = require('langchain/agents/toolkits/sql');
-const { DataSource } = require('typeorm');
-const dotenv = require('dotenv');
-const path = require('path');
-
-// Load environment variables from .env file
-dotenv.config();
-
-// Function to run the example
-const run = async () => {
-  // Initialize the SQL database connection
-  const datasource = new DataSource({
-    type: 'sqlite',
-    database: path.join(__dirname, 'northwind.db'), // Adjust the path as per your setup
-  });
-  const db = await SqlDatabase.fromDataSourceParams({
-    appDataSource: datasource,
-  });
-
-  // Initialize the Groq client with the API key from environment variables
-  const apiKey = process.env.GROQ_API_KEY;
-
-  // Initialize the OpenAI model
-  const model = new ChatGroq({
-    apiKey: apiKey,
-    model: 'llama3-8b-8192', // Specify the desired model here
-  });
-
-  // Initialize the SQL toolkit with the database and model
-  const toolkit = new SqlToolkit(db, model);
-
-  // Create the SQL agent executor
-  const executor = createSqlAgent(model, toolkit);
-
-  // Example input query
-  const input = `How many employees are there`;
-
-  console.log(`Executing with input "${input}"...`);
-
-  try {
-    // Invoke the SQL agent with the input query
-    const result = await executor.invoke({ input });
-
-    console.log(`Got output: ${result.output}`);
-
-    console.log(
-      `Got intermediate steps: ${JSON.stringify(
-        result.intermediateSteps,
-        null,
-        2
-      )}`
-    );
-  } catch (error) {
-    console.error('Error executing query:', error);
-  }
-  // finally {
-  //   // Destroy the datasource connection
-  //   await datasource.destroy();
-  //   console.log('Datasource connection destroyed.');
-  // }
-};
-
-// Run the example
-run();
