@@ -4,6 +4,8 @@ from langchain_groq import ChatGroq
 from langchain_community.utilities import SQLDatabase
 from sqlalchemy import create_engine, inspect
 from langchain.chains import create_sql_query_chain
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
 
 # Load environment variables from .env file
 load_dotenv()
@@ -15,18 +17,24 @@ os.environ["GROQ_API_KEY"] = os.getenv("GROQ_API_KEY")
 llm = ChatGroq(model="llama3-8b-8192")
 
 # Create a connection to the northwind.db database
-engine = create_engine('sqlite:///Databases/northwind.db')
+# engine = create_engine('sqlite:///Databases/northwind.db')
 
 # Print the dialect
 # print(engine.dialect.name)
 
 # Get usable table names
-inspector = inspect(engine)
-table_names = inspector.get_table_names()
+# inspector = inspect(engine)
+# table_names = inspector.get_table_names()
 # print(table_names) 
 
 # Initialize the SQLDatabase utility
 db = SQLDatabase.from_uri('sqlite:///Databases/northwind.db')
+
+# Print the dialect
+# print(db.dialect)
+
+table_names=db.get_usable_table_names()
+# print(table_names)
 
 """ chain = create_sql_query_chain(llm, db)
 
@@ -38,12 +46,21 @@ print(response) """
 # db.run(sql_query)
 
 
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.prompts import ChatPromptTemplate
+# Create a connection to the northwind.db database
+engine = create_engine('sqlite:///Databases/northwind.db')
+inspector = inspect(engine)
 
-# Fetch the table info
-table_info = "\n".join([f"{table}" for table in table_names])
-print(table_info)
+# Fetch the table columns using SQLAlchemy directly
+table_columns = {}
+for table_name in table_names:
+    columns = inspector.get_columns(table_name)
+    column_names = [column['name'] for column in columns]
+    table_columns[table_name] = column_names
+# print(table_columns)
+
+# Format table and column information for the prompt
+table_info = "\n".join([f"{table}: {', '.join(columns)}" for table, columns in table_columns.items()])
+# print(table_info)
 
 # Define the system prompt
 system = """You are a {dialect} expert. Given an input question, create a syntactically correct {dialect} query to run.
@@ -69,12 +86,14 @@ Use format:
 
 First draft: <<FIRST_DRAFT_QUERY>>
 Final answer: <<FINAL_ANSWER_QUERY>>
+
+Only output the SQL query without additional context, so that it can be run directly.
 """
 
-# Initialize the prompt template
 prompt = ChatPromptTemplate.from_messages(
     [("system", system), ("human", "{input}")]
-).partial(dialect=engine.dialect.name, table_info=table_info, top_k=5)
+).partial(dialect=db.dialect, table_info=table_info, top_k=5)
+
 
 # Function to parse the final answer from the output
 def parse_final_answer(output: str) -> str:
@@ -89,7 +108,7 @@ def parse_final_answer(output: str) -> str:
 chain = create_sql_query_chain(llm, db, prompt=prompt) | parse_final_answer
 
 # Example question
-question = "What is the total sales amount for each customer in descending order?"
+question = "List the product names, supplier names, and total quantities ordered for each product. Only include products that have been ordered more than 50 times, and sort the results by the total quantity ordered in descending order."
 
 # Invoke the chain with the question
 query = chain.invoke({"question": question})
