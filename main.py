@@ -25,15 +25,15 @@ llm = ChatGroq(model="llama3-8b-8192")
 # Get usable table names
 # inspector = inspect(engine)
 # table_names = inspector.get_table_names()
-# print(table_names) 
+# print(table_names)
 
 # Initialize the SQLDatabase utility
-db = SQLDatabase.from_uri('sqlite:///Databases/northwind.db')
+db = SQLDatabase.from_uri("sqlite:///Databases/northwind.db")
 
 # Print the dialect
 # print(db.dialect)
 
-table_names=db.get_usable_table_names()
+table_names = db.get_usable_table_names()
 # print(table_names)
 
 """ chain = create_sql_query_chain(llm, db)
@@ -47,19 +47,21 @@ print(response) """
 
 
 # Create a connection to the northwind.db database
-engine = create_engine('sqlite:///Databases/northwind.db')
+engine = create_engine("sqlite:///Databases/northwind.db")
 inspector = inspect(engine)
 
 # Fetch the table columns using SQLAlchemy directly
 table_columns = {}
 for table_name in table_names:
     columns = inspector.get_columns(table_name)
-    column_names = [column['name'] for column in columns]
+    column_names = [column["name"] for column in columns]
     table_columns[table_name] = column_names
 # print(table_columns)
 
 # Format table and column information for the prompt
-table_info = "\n".join([f"{table}: {', '.join(columns)}" for table, columns in table_columns.items()])
+table_info = "\n".join(
+    [f"{table}: {', '.join(columns)}" for table, columns in table_columns.items()]
+)
 # print(table_info)
 
 # Define the system prompt
@@ -103,6 +105,7 @@ def parse_final_answer(output: str) -> str:
         return output.split("Final answer:")[1].strip()
     else:
         return "Error: Final answer not found in output."
+
 
 # Create the SQL query chain
 chain = create_sql_query_chain(llm, db, prompt=prompt) | parse_final_answer
