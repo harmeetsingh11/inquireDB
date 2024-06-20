@@ -54,14 +54,20 @@ def main():
     # Create the agent executor
     agent_executor = create_agent(llm, db)
 
-    # Invoke the agent with a query
-    query = input("Ask a question from {db.dialect} Database:")
+    while True:
+        # Get input query from user
+        query = input("Enter your question (type 'exit' to quit): ")
 
-    response = invoke_agent(agent_executor, query)
+        if query.lower() == "exit":
+            print("Exiting the application...")
+            break
 
-    # Extract and format the 'output' value from response JSON object
-    output = response.get("output", "")
-    print(output)
+        # Invoke the agent with the user's query
+        response = invoke_agent(agent_executor, query)
+
+        # Extract and format the 'output' value from response JSON object
+        output = response.get("output", "")
+        print("\n" + output + "\n")
 
 
 if __name__ == "__main__":
