@@ -28,9 +28,13 @@ def initialize_chat_model(model_name, temperature=0, verbose=True, max_tokens=10
     )
 
 
-def create_agent(llm, db, agent_type="zero-shot-react-description", verbose=True):
+def create_agent(
+    llm, db, agent_type="zero-shot-react-description", verbose=True, top_k=5
+):
     """Create the SQL agent executor."""
-    return create_sql_agent(llm, db=db, agent_type=agent_type, verbose=verbose)
+    return create_sql_agent(
+        llm, db=db, agent_type=agent_type, verbose=verbose, top_k=top_k
+    )
 
 
 def invoke_agent(agent_executor, input_query):
