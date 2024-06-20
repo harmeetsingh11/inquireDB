@@ -4,16 +4,15 @@
 
 **inquireDB** is an AI-powered SQL agent designed to facilitate Q&A interactions with an SQL database using natural language. It leverages `GroqCloud API`, `Llama3` (an open-source Large Language Model), and `LangChain` framework to convert user queries into SQL commands, execute them against an SQLite database (using the `Northwind` sample database), and present the results in plain English via a Streamlit-based user interface.
 
+![Excalidraw](https://github.com/harmeetsingh11/inquireDB/assets/130365071/e47f0941-fb7c-4fbd-ac5c-561fcadb12d4)
+
+
 ## Features ✨
 
 - **Natural Language Processing**: Converts plain English questions into DSL queries using Llama3.
-
 - **SQL Execution**: Executes SQL queries against an SQLite database (Northwind sample database).
-
 - **User Interface**: Provides a user-friendly interface using Streamlit for input and output interactions.
-
 - **Error Handling**: Handles output parsing errors and retries queries using LangChain's capabilities.
-
 - **Conversation History**: Maintains a conversation history to display previous interactions.
 
 ## Technologies Used 🛠️
