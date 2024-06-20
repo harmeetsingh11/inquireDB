@@ -55,10 +55,13 @@ def main():
     agent_executor = create_agent(llm, db)
 
     # Invoke the agent with a query
-    query = "List the Products whose Unit Price is less than 20"
+    query = input("Ask a question from {db.dialect} Database:")
+
     response = invoke_agent(agent_executor, query)
 
-    print(response)
+    # Extract and format the 'output' value from response JSON object
+    output = response.get("output", "")
+    print(output)
 
 
 if __name__ == "__main__":
