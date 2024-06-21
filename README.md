@@ -4,24 +4,44 @@
 
 **inquireDB** is an AI-powered SQL agent designed to facilitate Q&A interactions with an SQL database using natural language. It leverages `GroqCloud API`, `Llama3` (an open-source Large Language Model), and `LangChain` framework to convert user queries into SQL commands, execute them against an SQLite database (using the `Northwind` sample database), and present the results in plain English via a Streamlit-based user interface.
 
+## Architecture Overview 📍
+
 ![Excalidraw](https://github.com/harmeetsingh11/inquireDB/assets/130365071/e47f0941-fb7c-4fbd-ac5c-561fcadb12d4)
 
+The inquireDB application follows a structured workflow to process user queries:
+
+1. **Input:** User enters a natural language query via the command-line interface.
+
+2. **Natural Language Understanding:** Llama3 model processes the query and converts it into a Domain Specific Language (DSL) query.
+
+3. **SQL Query Execution:** Langchain SQL agent executes the DSL query against the SQLite database.
+
+4. **Output:** The query results are retrieved from the database and formatted into human-readable text using Langchain output parsing.
 
 ## Features ✨
 
 - **Natural Language Processing**: Converts plain English questions into DSL queries using Llama3.
+
 - **SQL Execution**: Executes SQL queries against an SQLite database (Northwind sample database).
+
 - **User Interface**: Provides a user-friendly interface using Streamlit for input and output interactions.
+
 - **Error Handling**: Handles output parsing errors and retries queries using LangChain's capabilities.
+
 - **Conversation History**: Maintains a conversation history to display previous interactions.
 
 ## Technologies Used 🛠️
 
 - **GroqCloud API**: Hardware/software platform for building GenAI applications. Used for natural language processing and DSL query generation.
+
 - **Llama3**: Open-source Large Language Model (LLM) used for understanding and generating SQL queries from user input.
+
 - **LangChain**: Framework for creating conversational agents and handling complex interactions, including error handling and conversation memory.
+
 - **Streamlit**: Python library for building interactive web applications. Used for creating the user interface of inquireDB.
+
 - **SQLite**: Lightweight, embedded database used for storing and querying data in the Northwind sample database.
+
 - **Python 3**: Programming language used for implementing the application logic and integration with external libraries.
 
 ## Setup Instructions 🚀
