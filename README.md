@@ -13,6 +13,7 @@
   - [Screenshots 📷](#screenshots-)
   - [File Structure 📁](#file-structure-)
   - [Usage 📘](#usage-)
+  - [Sample Questions 📝](#sample-questions-)
 
 ## Overview ℹ️
 
@@ -142,3 +143,22 @@ The project's directory structure is organized to facilitate modular development
 - Upon running `main.py`, the Streamlit interface launches.
 - Users can input questions in natural language regarding the `Northwind` database.
 - inquireDB converts these questions into SQL queries, executes them, and displays results in plain English.
+
+## Sample Questions 📝
+
+You can interact with inquireDB by asking questions related to the `Northwind` database. Here are some examples:
+
+1.  ```List all the Product Names which have been discontinued.```
+
+2.  ```How many Employees are there?```
+   
+3.  ```List all the Territories which have Region ID 3.```
+
+4.  ```How many total Orders are placed by Customer ID HANAR?```
+
+5.  ```List last 5 orders placed.```
+
+6.  ```How many orders are shipped to USA?```
+
+7.  ``` List names of first 5 employees.```
+
