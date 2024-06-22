@@ -1,72 +1,45 @@
-import os
-from dotenv import load_dotenv
-from langchain_groq import ChatGroq
-from langchain_community.utilities import SQLDatabase
-from langchain_community.agent_toolkits.sql.base import create_sql_agent
-from langchain.memory import ConversationBufferMemory
+import streamlit as st
+from config.config import load_config
+from database.database import init_database
+from chain.sql_chain import get_response
+from handlers.chat_handler import initialize_chat, display_chat, append_message
+from langchain_core.messages import HumanMessage, AIMessage
 
+# Load environment variables and configurations
+load_config()
 
-def load_environment():
-    """Load environment variables from .env file."""
-    load_dotenv()
-    os.environ["GROQ_API_KEY"] = os.getenv("GROQ_API_KEY")
+# Initialize chat history
+initialize_chat()
 
+# Set Streamlit page configuration
+st.set_page_config(page_title="InquireDB", page_icon=":speech_balloon:")
 
-def initialize_database(db_uri):
-    """Initialize the SQL database."""
-    db = SQLDatabase.from_uri(db_uri)
-    db.get_usable_table_names()
-    return db
+# Display the title
+st.title("Welcome to InquireDB! 💬")
 
+# Initialize database
+db = init_database()
+st.session_state.db = db
 
-def initialize_chat_model(model_name, temperature=0, verbose=True, max_tokens=1024):
-    """Initialize the ChatGroq model."""
-    return ChatGroq(
-        model=model_name,
-        temperature=temperature,
-        verbose=verbose,
-        max_tokens=max_tokens,
-    )
+# Display chat messages
+display_chat()
 
+# Handle user input
+user_query = st.chat_input("Please ask your question...")
+if user_query is not None and user_query.strip() != "":
+    user_message = HumanMessage(content=user_query)
+    append_message(user_message)
 
-def create_agent(
-    llm, db, agent_type="zero-shot-react-description", verbose=True, top_k=5
-):
-    memory = ConversationBufferMemory(memory_key="history", input_key="input")
-    """Create the SQL agent executor."""
-    return create_sql_agent(
-        llm,
-        db=db,
-        agent_type=agent_type,
-        verbose=verbose,
-        top_k=top_k,
-        handle_parsing_errors=True,
-        agent_executor_kwargs={"memory": memory},
-        input_variables=["input", "agent_scratchpad", "history"],
-    )
+    # Display the user's message in the Streamlit chat interface under "Human"
+    with st.chat_message("Human"):
+        st.markdown(user_query)
 
+    # Retrieve and display the AI's response to the user's query
+    with st.chat_message("AI"):
+        response = get_response(
+            user_query, st.session_state.db, st.session_state.chat_history
+        )
+        st.markdown(response)
 
-def invoke_agent(agent_executor, input_query):
-    """Invoke the agent executor with a given query."""
-    try:
-        response = agent_executor.invoke({"input": input_query})
-        return response.get("output", "")
-    except Exception as e:
-        return f"An error occurred: {e}"
-
-
-def initialize_system():
-    """Initialize the entire system: environment, database, model, and agent."""
-    load_environment()
-
-    # Initialize the database
-    db_uri = "sqlite:///Databases/northwind.db"
-    db = initialize_database(db_uri)
-
-    # Initialize the chat model
-    model_name = "llama3-8b-8192"
-    llm = initialize_chat_model(model_name)
-
-    # Create the agent executor
-    agent_executor = create_agent(llm, db)
-    return agent_executor
+    ai_message = AIMessage(content=response)
+    append_message(ai_message)
