@@ -2,7 +2,7 @@
 
 ## Overview ℹ️
 
-**inquireDB** is an AI-powered SQL agent designed to facilitate Q&A interactions with an SQL database using natural language. It leverages `GroqCloud API`, `Llama3` (an open-source Large Language Model), and `LangChain` framework to convert user queries into SQL commands, execute them against an SQLite database (using the `Northwind` sample database), and present the results in plain English via a Streamlit-based user interface.
+**inquireDB** is an AI-powered SQL agent designed to facilitate Q&A interactions with an SQL database using natural language. It leverages `GroqCloud API`, `Llama3` (an open-source Large Language Model), and `LangChain` framework to convert user queries into SQL commands, execute them against an SQLite database (using the `Northwind` sample database), and present the results in natural language via a Streamlit-based user interface.
 
 ## Architecture Overview 📍
 
@@ -10,25 +10,30 @@
 
 The inquireDB application follows a structured workflow to process user queries:
 
-1. **Input:** User enters a natural language query via the command-line interface.
+1. **Input**: User enters a natural language query via the Streamlit user interface.
 
-2. **Natural Language Understanding:** Llama3 model processes the query and converts it into a Domain Specific Language (DSL) query.
+2. **Natural Language Understanding**: The Llama3 model processes the query and generates a Domain Specific Language (DSL) query. This DSL query is passed to the LangChain SQL chain.
 
-3. **SQL Query Execution:** Langchain SQL agent executes the DSL query against the SQLite database.
+3. **SQL Query Execution**: The LangChain SQL chain executes the DSL query against the SQLite database.
 
-4. **Output:** The query results are retrieved from the database and formatted into human-readable text using Langchain output parsing.
+4. **Output**: The query results are retrieved from the database. LangChain Chain then formats the results into human-readable text using its output parsing capabilities.
 
 ## Features ✨
 
-- **Natural Language Processing**: Converts plain English questions into DSL queries using Llama3.
+- **Natural Language Processing**: Utilizes the Large Language Model (LLM) `Llama3`, to interpret and respond to user queries in natural language, converting them into DSL queries (specifically SQL/SQLite).
 
-- **SQL Execution**: Executes SQL queries against an SQLite database (Northwind sample database).
+- **SQL Execution**: Dynamically generates SQL queries based on the user's natural language input and executes them against an SQLite database (using the `Northwind` sample database), demonstrating practical database interaction.
 
-- **User Interface**: Provides a user-friendly interface using Streamlit for input and output interactions.
+- **User Interface**: Features a user-friendly GUI built with Streamlit, allowing seamless input and output interactions for users.
 
-- **Error Handling**: Handles output parsing errors and retries queries using LangChain's capabilities.
+- **Database Interaction**: Establishes connection with a SQL database to efficiently retrieve query results, showcasing robust and practical database interaction capabilities.
 
-- **Conversation History**: Maintains a conversation history to display previous interactions.
+- **Error Handling**: Implements robust error handling mechanisms to manage output parsing errors and retries queries using LangChain's capabilities.
+
+- **Conversation History**: Maintains a comprehensive conversation history, enabling users to review previous interactions seamlessly.
+
+- **Python-based**: Entirely coded in Python, emphasizing best practices in software development with contemporary technologies.
+
 
 ## Technologies Used 🛠️
 
@@ -36,7 +41,7 @@ The inquireDB application follows a structured workflow to process user queries:
 
 - **Llama3**: Open-source Large Language Model (LLM) used for understanding and generating SQL queries from user input.
 
-- **LangChain**: Framework for creating conversational agents and handling complex interactions, including error handling and conversation memory.
+- **LangChain**: Framework for creating conversational agents, custom chains and handling complex interactions, including error handling and conversation history.
 
 - **Streamlit**: Python library for building interactive web applications. Used for creating the user interface of inquireDB.
 
@@ -72,28 +77,45 @@ The inquireDB application follows a structured workflow to process user queries:
      ```
 
 3. **Initialize the System**:
-   - Run `app.py` using Streamlit:
+   - Run `main.py` using Streamlit:
      ```bash
-     streamlit run app.py
+     streamlit run main.py
      ```
 
 4. **Interact with inquireDB**:
    - Open your web browser and navigate to the Streamlit application URL (default: http://localhost:8501).
    - Ask questions in plain English related to the Northwind database and observe the responses generated by inquireDB.
 
+
 ## File Structure 📁
 
-- **`app.py`**: Streamlit application code handling UI and user interactions.
-- **`main.py`**: Backend logic including initialization of environment, database, model, agent, and query execution.
-- **`Databases/northwind.db`**: SQLite database file containing the Northwind sample database.
+The project's directory structure is organized to facilitate modular development and ease of maintenance:
+
+- **`main.py`**: Entry point for the Streamlit application and backend logic, including initialization of environment variables, database, model, agent, and query execution.
+
+- **`config/`**: Directory containing configuration files and setup scripts.
+  - **`config.py`**: Loads environment variables and configures application settings.
+
+- **`utils/`**: Utilities directory containing helper functions.
+  - **`utils.py`**: Utility functions for common tasks.
+
+- **`handlers/`**: Handlers for managing chat history and interaction.
+  - **`chat_handler.py`**: Manages chat history, user inputs, and AI responses.
+
+- **`database/`**: Handles database initialization and interaction.
+  - **`database.py`**: Initializes and connects to the SQLite database (`northwind.db`).
+
+- **`chain/`**: Handles the SQL chain processing and interaction.
+  - **`sql_chain.py`**: Defines the SQL chain for processing user queries and generating responses.
+
+- **`prompts/`**: Contains prompt templates for guiding user interactions.
+  - **`prompts.py`**: Provides templates for generating prompts used in chat interactions.
+
+- **`Databases/`**: Directory containing the SQLite database file.
+  - **`northwind.db`**: Sample SQLite database used for demonstrating inquireDB functionalities.
 
 ## Usage 📘
 
-- Upon running `app.py`, the Streamlit interface launches.
-- Users can input questions in natural language regarding the Northwind database.
+- Upon running `main.py`, the Streamlit interface launches.
+- Users can input questions in natural language regarding the `Northwind` database.
 - inquireDB converts these questions into SQL queries, executes them, and displays results in plain English.
-
-## Additional Notes 📝
-
-- **Error Handling**: The application handles output parsing errors by retrying queries when `handle_parsing_errors=True` is set in `create_agent()` in `main.py`.
-- **Extensibility**: The application can be extended to support additional databases or models by modifying the `initialize_database()` and `initialize_chat_model()` functions in `main.py`.
