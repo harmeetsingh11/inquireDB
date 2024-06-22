@@ -1,4 +1,4 @@
-# InquireDB - An AI SQL Agent for Q&A Using `GroqCloud API` and `LangChain` 👩‍💻
+# InquireDB - Transforming database interactions into seamless conversations! 👩‍💻
 
 ## Table of Contents 📃
 
