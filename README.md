@@ -102,6 +102,10 @@ The inquireDB application follows a structured workflow to process user queries:
 
 ## Demo Video 📹
 
+https://github.com/harmeetsingh11/inquireDB/assets/130365071/51d9fbe3-449b-48b8-896c-ee2d6851e726
+
+
+
 ## Screenshots 📷
 
 ## File Structure 📁
