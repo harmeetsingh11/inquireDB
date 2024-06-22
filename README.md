@@ -1,4 +1,4 @@
-# InquireDB - Transforming database interactions into seamless conversations! 👩‍💻
+# InquireDB - Transforming Database Interactions into Seamless Conversations! 👩‍💻
 
 ## Table of Contents 📃
 
