@@ -1,4 +1,4 @@
-# inquireDB - An AI SQL Agent for Q&A Using GroqCloud API and LangChain 👩‍💻
+# InquireDB - An AI SQL Agent for Q&A Using `GroqCloud API` and `LangChain` 👩‍💻
 
 ## Table of Contents 📃
 
@@ -16,7 +16,7 @@
 
 ## Overview ℹ️
 
-**inquireDB** is an AI-powered SQL agent designed to facilitate Q&A interactions with an SQL database using natural language. It leverages `GroqCloud API`, `Llama3` (an open-source Large Language Model), and `LangChain` framework to convert user queries into SQL commands, execute them against an SQLite database (using the `Northwind` sample database), and present the results in natural language via a Streamlit-based user interface.
+**InquireDB** is an AI-powered SQL agent designed to facilitate Q&A interactions with an SQL database using natural language. It leverages `GroqCloud API`, `Llama3` (an open-source Large Language Model), and `LangChain` framework to convert user queries into SQL commands, execute them against an SQLite database (using the `Northwind` sample database), and present the results in natural language via a Streamlit-based user interface.
 
 ## Architecture Overview 📍
 
@@ -57,7 +57,7 @@ The inquireDB application follows a structured workflow to process user queries:
 
 - **LangChain**: Framework for creating conversational agents, custom chains and handling complex interactions, including error handling and conversation history.
 
-- **Streamlit**: Python library for building interactive web applications. Used for creating the user interface of inquireDB.
+- **Streamlit**: Python library for building interactive web applications. Used for creating the user interface of InquireDB.
 
 - **SQLite**: Lightweight, embedded database used for storing and querying data in the Northwind sample database.
 
@@ -104,9 +104,11 @@ The inquireDB application follows a structured workflow to process user queries:
 
 https://github.com/harmeetsingh11/inquireDB/assets/130365071/51d9fbe3-449b-48b8-896c-ee2d6851e726
 
-
-
 ## Screenshots 📷
+
+![ss1](https://github.com/harmeetsingh11/inquireDB/assets/130365071/9064d287-b24d-4e6f-9d9c-ebcdb1e6f297)
+
+![ss2](https://github.com/harmeetsingh11/inquireDB/assets/130365071/a8f5fa04-2abf-432e-b6e5-b7ff5a3f229a)
 
 ## File Structure 📁
 
